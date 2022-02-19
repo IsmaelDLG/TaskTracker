@@ -5,7 +5,7 @@ Task Tracker es una aplicación para mantener un registro de las tareas realizad
 - [Task Tracker](#task-tracker)
   - [Documentación](#documentación)
   - [Quickstart](#quickstart)
-  - [TODO](#todo)
+  - [ToDo List](#todo-list)
 
 ## Documentación
 
@@ -13,11 +13,17 @@ Encontrarás la documentación del proyecto [aquí](./docs/1-Introduction.md)
 
 ## Quickstart
 
-## TODO
-  1. Make it a package (https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata)
-  2. Create a git repository and upload it to GitHub.
-  3. Create proper logging.
-  4. Document the code (python docstrings).
-  5. Make tests.
-  6. Change configuration sistem.
-  7. Make a "roadmap" for this project
+Work in progres.
+
+## ToDo List
+
+| **Description**                       | Status      |
+| ------------------------------------- | ----------- |
+| Make it a package                     | **DONE**    |
+| Git repository + GitHub               | **DONE**    |
+| Create logging                        | NOT STARTED |
+| Document the code (python docstrings) | NOT STARTED |
+| Make tests                            | NOT STARTED |
+| Create a cross-platform Makefile      | NOT STARTED |
+| Make the app configurable             | NOT STARTED |
+| Make a "roadmap" for this project     | NOT STARTED |

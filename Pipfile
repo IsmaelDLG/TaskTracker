@@ -5,10 +5,11 @@ name = "pypi"
 
 [packages]
 click = "*"
-black = "*"
-build = "*"
 
 [dev-packages]
+black = "*"
+build = "*"
+twine = "*"
 
 [requires]
 python_version = "3.9"
