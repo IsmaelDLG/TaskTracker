@@ -3,10 +3,12 @@ from pathlib import Path
 from time import time
 from typing import List, Tuple
 
-from domain.DomainCtlInt import DomainCtlInt
-from persistance.model.task import Task
-from persistance.ShelvePersistance import ShelvePersistance as persistanceCtl
-from utils.parsers import parse_timestamp, parse_tags
+from tasktracker.domain.DomainCtlInt import DomainCtlInt
+from tasktracker.persistance.model.task import Task
+from tasktracker.persistance.ShelvePersistance import (
+    ShelvePersistance as persistanceCtl,
+)
+from tasktracker.utils.parsers import parse_timestamp, parse_tags
 
 
 class DomainCtlImpl(DomainCtlInt):

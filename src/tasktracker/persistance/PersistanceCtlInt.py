@@ -1,6 +1,6 @@
-from persistance.model.task import Task
 from typing import List, Tuple
 import abc
+from tasktracker.persistance.model.task import Task
 
 
 class PersistanceCtlInt(abc.ABC):

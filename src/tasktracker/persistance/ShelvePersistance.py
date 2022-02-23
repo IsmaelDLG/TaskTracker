@@ -5,8 +5,8 @@ from typing import List, Tuple
 import shelve
 from time import time
 
-from persistance.PersistanceCtlInt import PersistanceCtlInt
-from persistance.model.task import Task
+from tasktracker.persistance.PersistanceCtlInt import PersistanceCtlInt
+from tasktracker.persistance.model.task import Task
 
 
 class ShelvePersistance(PersistanceCtlInt):

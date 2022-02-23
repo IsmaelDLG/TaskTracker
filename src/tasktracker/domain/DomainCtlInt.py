@@ -1,6 +1,6 @@
 import abc
 from typing import List, Tuple
-from persistance.model.task import Task
+from tasktracker.persistance.model.task import Task
 
 
 class DomainCtlInt(abc.ABC):

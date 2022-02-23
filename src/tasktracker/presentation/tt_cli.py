@@ -5,9 +5,9 @@ from typing import Tuple, Type
 import click
 from datetime import datetime
 
-from domain.DomainCtlImp import DomainCtlImpl as DomainCtl
-from utils.parsers import parse_timestamp, parse_tags
-from utils.config import load_config, DATE_FORMAT, TIME_FORMAT
+from tasktracker.domain.DomainCtlImp import DomainCtlImpl as DomainCtl
+from tasktracker.utils.parsers import parse_timestamp, parse_tags
+from tasktracker.utils.config import load_config, DATE_FORMAT, TIME_FORMAT
 
 
 def validate_time(ctx, param, value) -> float:

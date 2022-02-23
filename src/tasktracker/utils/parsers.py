@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any, List, Tuple, Union
 from pathlib import Path
 
-from utils.config import BASE_PATH, DATE_FORMAT, TIME_FORMAT
+from tasktracker.utils.config import BASE_PATH, DATE_FORMAT, TIME_FORMAT
 
 
 def parse_timestamp(

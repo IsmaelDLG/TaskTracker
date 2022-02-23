@@ -1,5 +1,4 @@
-# Project specific
 tmp/
-# Python specific
 __pycache__
+.vscode/
 *.egg-info

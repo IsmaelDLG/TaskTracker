@@ -2,7 +2,7 @@ from ctypes import util
 from typing import List, Tuple
 from datetime import datetime
 
-from utils.config import DATE_FORMAT, TIME_FORMAT
+from tasktracker.utils.config import DATE_FORMAT, TIME_FORMAT
 
 
 class Task:
