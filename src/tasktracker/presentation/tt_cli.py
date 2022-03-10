@@ -1,4 +1,3 @@
-import configparser
 from pathlib import Path
 from time import time
 from typing import Tuple, Type
@@ -7,15 +6,18 @@ from datetime import datetime
 
 from tasktracker.domain.DomainCtlImp import DomainCtlImpl as DomainCtl
 from tasktracker.utils.parsers import parse_timestamp, parse_tags
-from tasktracker.utils.config import load_config, DATE_FORMAT, TIME_FORMAT
+from tasktracker.utils.config import load_config
+
+
+config = load_config("CLI")
 
 
 def validate_time(ctx, param, value) -> float:
     try:
-        return parse_timestamp(value)
+        return parse_timestamp(value, config["input_time_formats"])
     except ValueError:
         raise click.BadParameter(
-            f"Got {value}. Format must be  {DATE_FORMAT} {TIME_FORMAT} or {TIME_FORMAT}."
+            f"Got {value}. Format must be on of {', '.join(config['input_time_formats'])}."
         )
     except TypeError:
         # Its ok to be None
@@ -48,21 +50,21 @@ def task():
     type=click.UNPROCESSED,
     callback=validate_time,
     default=time(),
-    help=f"Creation time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, creation_time is the current time",
+    help=f"Creation time as a timestamp or a string-like date. If not specified, creation_time is the current time",
 )
 @click.option(
     "-s",
     "--start-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"Start time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, start_time is the same as creation time",
+    help=f"Start time as a timestamp or a string-like date. If not specified, start_time is the same as creation time",
 )
 @click.option(
     "-e",
     "--end-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"End time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, this field is left empty",
+    help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
     "-p",
@@ -83,7 +85,7 @@ def task():
     "--notes",
     type=str,
     default="",
-    help="Notes for thye task. If not specified, this field is left empty.",
+    help="Notes for the task. If not specified, this field is left empty.",
 )
 @task.command()
 @click.pass_context
@@ -116,14 +118,14 @@ def create(
     type=click.UNPROCESSED,
     callback=validate_time,
     default=time(),
-    help=f"Creation time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, creation_time is the current time",
+    help=f"Creation time as a timestamp or a string-like date. If not specified, creation_time is the current time",
 )
 @click.option(
     "-s",
     "--start-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"Start time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, start_time is the same as creation time",
+    help=f"Start time as a timestamp or a string-like date. If not specified, start_time is the same as creation time",
 )
 @click.option(
     "-t",
@@ -137,7 +139,7 @@ def create(
     "--notes",
     type=str,
     default="",
-    help="Notes for thye task. If not specified, this field is left empty.",
+    help="Notes for the task. If not specified, this field is left empty.",
 )
 @task.command()
 @click.pass_context
@@ -170,7 +172,7 @@ def start(
     "--end-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"End time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, this field is left empty",
+    help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
     "-p",
@@ -191,7 +193,7 @@ def start(
     "--notes",
     type=click.STRING,
     default="",
-    help="Notes for thye task. If not specified, this field is left empty.",
+    help="Notes for the task. If not specified, this field is left empty.",
 )
 @task.command()
 @click.pass_context
@@ -217,7 +219,7 @@ def end(
     "--end-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"End time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, this field is left empty",
+    help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
     "-p",
@@ -238,7 +240,7 @@ def end(
     "--notes",
     type=click.STRING,
     default="",
-    help="Notes for thye task. If not specified, this field is left empty.",
+    help="Notes for the task. If not specified, this field is left empty.",
 )
 @task.command()
 @click.pass_context
@@ -263,21 +265,21 @@ def end_last(
     type=click.UNPROCESSED,
     callback=validate_time,
     default=time(),
-    help=f"Creation time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, creation_time is the current time",
+    help=f"Creation time as a timestamp or a string-like date. If not specified, creation_time is the current time",
 )
 @click.option(
     "-s",
     "--start-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"Start time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, start_time is the same as creation time",
+    help=f"Start time as a timestamp or a string-like date. If not specified, start_time is the same as creation time",
 )
 @click.option(
     "-e",
     "--end-time",
     type=click.UNPROCESSED,
     callback=validate_time,
-    help=f"End time as a timestamp, a string like {DATE_FORMAT} {TIME_FORMAT} or like {TIME_FORMAT} (using standard 1989 C standard format codes) for the task. If not specified, this field is left empty",
+    help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
     "-p",
@@ -298,7 +300,7 @@ def end_last(
     "--notes",
     type=str,
     default="",
-    help="Notes for thye task. If not specified, this field is left empty.",
+    help="Notes for the task. If not specified, this field is left empty.",
 )
 @task.command()
 @click.pass_context

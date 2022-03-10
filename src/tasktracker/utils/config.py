@@ -1,53 +1,63 @@
-from configparser import ConfigParser
 from pathlib import Path
 
-BASE_PATH = Path(__file__).parent.parent
-DATE_FORMAT = "%d/%m/%Y"
-TIME_FORMAT = "%H:%M"
-CONFIG_FILE = BASE_PATH / Path("settings.ini")
+BASE_PATH = Path(".").parent
 
 
+def load_config(key: str = None) -> dict:
+    if isinstance(key, str):
+
+        def raise_(ex):
+            raise ex
+
+        return CONFIGURATIONS.get(
+            key, lambda: raise_(RuntimeError("Requested configuration doesn't exist!"))
+        )()
+    else:
+        return {k: v() for k, v in CONFIGURATIONS.items()}
+
+
+def logging_config() -> dict:
+    return {
+        "level": "debug",
+        "file": BASE_PATH / Path("tasktracker.log"),
+        "format": "%(asctime)s %(levelname)s %(module)s:%(lineno)s -> %(message)s",
+        "time_format": "%Y-%m-%dT%H:%M:%S%z",
+        "max_size": 500 * 1024**2,
+        "backup_count": 5,
+    }
+
+
+def csv_config():
+    return {
+        "delimiter": ";",
+        "import_headers": "start_time;end_time;pause;tags;notes",
+        "export_headers": "start_time;end_time;pause;dedication;tags;notes",
+    }
+
+
+def shelve_config():
+    return {
+        "tasks_path": BASE_PATH / Path("TasksDB"),
+        "profiles_path": BASE_PATH / Path("ProfilesDB"),
+    }
+
+
+def cli_config():
+    return {
+        "input_time_formats": [
+            "%Y-%m-%dT%H:%M:%S%z",
+            "%Y-%m-%d %H:%M:%S",
+            "%H:%M:%S",
+            "%s",
+        ]
+    }
+
+
+CONFIGURATIONS = {
+    "LOGGING": logging_config,
+    "CSV": csv_config,
+    "PERSISTANCE": shelve_config,
+}
 if __name__ == "__main__":
-    config = ConfigParser(allow_no_value=True)
-    config["APP"] = {
-        "# Global configuration for the application": None,
-        "environment": "devel",
-        "log_file": BASE_PATH / Path("tasktracker.log"),
-        "log_format": "{datetime} {level} {user} {file}:{line} -> {message}",
-    }
-
-    config["DOMAIN"] = {
-        "csv_default_delimiter": ";",
-        "csv_default_headers": "start_time;end_time;pause;tags;notes",
-    }
-
-    config["PERSISTANCE"] = {
-        "loglevel": "debug",
-        "# Shelve config": None,
-        "tasks_file": BASE_PATH / Path("tasksDB"),
-        "profiles_file": BASE_PATH / Path("profilesDB"),
-    }
-
-    config["DEVEL"] = {"# Development configuration": None, "loglevel": "debug"}
-
-    config["TEST"] = {
-        "# Testing configuration": None,
-        "loglevel": "debug",
-    }
-
-    config["PROD"] = {
-        "# Production configuration": None,
-        "loglevel": "info",
-    }
-
-    with open(str(CONFIG_FILE), "w") as f:
-        config.write(f)
-
-
-def load_config(config_file: str = None) -> ConfigParser:
-    if not config_file:
-        config_file = BASE_PATH / Path("settings.ini")
-    conf = ConfigParser()
-    with open(config_file, "r") as f:
-        conf.read_file(f)
-    return conf
+    print(load_config("LOGGING"))
+    print(load_config())

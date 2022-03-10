@@ -1,14 +1,16 @@
 from configparser import ConfigParser
 from datetime import datetime
+from multiprocessing.sharedctypes import Value
 from typing import Any, List, Tuple, Union
 from pathlib import Path
 
-from tasktracker.utils.config import BASE_PATH, DATE_FORMAT, TIME_FORMAT
+from tasktracker.utils.logging import getCustomLogger
 
 
-def parse_timestamp(
-    atime: Any, strformat: str = f"{DATE_FORMAT} {TIME_FORMAT}"
-) -> float:
+logger = getCustomLogger(__name__)
+
+
+def parse_timestamp(atime: Any, strformats: Union[List[str], Tuple[str]]) -> float:
     if not atime:
         raise TypeError("Cannot parse None to a timestamp!")
 
@@ -18,13 +20,22 @@ def parse_timestamp(
         return float(atime)
     except ValueError:
         # Cannot be converted
-        pass
+        logger.debug(f"Could not convert time string to float!")
 
-    ts = None
-    # This will raise ValueError if it doesn't work
-    date = datetime.strptime(atime, strformat)
-    ts = date.timestamp()
-    return ts
+    if type(strformats) in (list, tuple):
+        for f in strformats:
+            try:
+                # This will raise ValueError if it doesn't work
+                date = datetime.strptime(atime, f)
+                ts = date.timestamp()
+                return ts
+            except:
+                logger.debug(f"Could not parse string using format: {f}")
+
+    # Raise exception to be consistent
+    exc = ValueError(f"Time {atime} could not be parsed!")
+    logger.exception(exc)
+    raise exc
 
 
 def parse_tags(tags: Any) -> float:

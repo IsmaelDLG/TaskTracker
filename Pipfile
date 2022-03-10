@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 click = "*"
-tasktracker = {path = "./output/dist/v0-0-4/tasktracker-0.0.4.tar.gz"}
+pyyaml = "*"
 
 [dev-packages]
 black = "*"
