@@ -28,17 +28,12 @@ Function Build {
     $BuildDir = "${PSScriptRoot}\output\dist\v$(${VERSION_HYPHENATED})"
     New-Item -ItemType Directory -Force -Path ${BuildDir} 
     python3 -m build -o ${BuildDir}
-    Break
 }
 
 Function Install {
-    param (
-        [Parameter(HelpMessage = "Plase provide a target for the action")]
-        [string]$Target
-    )
     if ($Target -eq "") {
         # Install current version in config file
-        "${DISTDIR}\v${VERSION_HYPHENATED}\${PROJECT}-${VERSION}${PACKAGE_ENDING}"
+        # "${DISTDIR}\v${VERSION_HYPHENATED}\${PROJECT}-${VERSION}${PACKAGE_ENDING}"
         $Target = $VERSION
     }
     if ( -not (Test-Path -Path $Target -PathType Leaf)) {
@@ -59,17 +54,22 @@ MAIN
 #>
 
 Switch (${Action}) {
-    "version" { "${PROJECT} v${VERSION}"; Break }
+    "version" { "${PROJECT} v${VERSION}" }
+
     "build" {
-        Build; Break
+        Build
+        break
+    }
+    "install" {
+        Install ${Target}
+        break
     }
     "update" {
         Build
-        Install ${Target}; Break
+        Install ${Target}
+        break
     }
-    "install" {
-        Install ${Target}; Break
-    }
+
 }
 
 

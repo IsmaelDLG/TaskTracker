@@ -47,6 +47,7 @@ class ShelvePersistance(PersistanceCtlInt):
             pause_time,
             tags,
             notes,
+            self.config,
         )
 
         self._update_metadata("last_id", last_id + 1)

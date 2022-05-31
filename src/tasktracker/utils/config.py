@@ -18,7 +18,7 @@ def load_config(key: str = None) -> dict:
 
 def logging_config() -> dict:
     return {
-        "level": "debug",
+        "level": "DEBUG",
         "file": BASE_PATH / Path("tasktracker.log"),
         "format": "%(asctime)s %(levelname)s %(module)s:%(lineno)s -> %(message)s",
         "time_format": "%Y-%m-%dT%H:%M:%S%z",
@@ -39,6 +39,7 @@ def shelve_config():
     return {
         "tasks_path": BASE_PATH / Path("TasksDB"),
         "profiles_path": BASE_PATH / Path("ProfilesDB"),
+        "time_format": "%Y-%m-%d %H:%M:%S",
     }
 
 
@@ -57,6 +58,7 @@ CONFIGURATIONS = {
     "LOGGING": logging_config,
     "CSV": csv_config,
     "PERSISTANCE": shelve_config,
+    "CLI": cli_config,
 }
 if __name__ == "__main__":
     print(load_config("LOGGING"))

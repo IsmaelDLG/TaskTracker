@@ -1,8 +1,6 @@
 from ctypes import util
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from datetime import datetime
-
-from tasktracker.utils.config import DATE_FORMAT, TIME_FORMAT
 
 
 class Task:
@@ -15,6 +13,7 @@ class Task:
         pause: float,
         tags: List[str],
         notes: str,
+        config: Dict,
     ) -> None:
 
         if not end_time is None and end_time - start_time - pause < 0:
@@ -27,6 +26,7 @@ class Task:
         self.pause = pause
         self.tags = tags
         self.notes = notes
+        self.config = config
 
     def dedication(self) -> float:
         """Returns dedication (in hours) of this task
@@ -69,14 +69,16 @@ class Task:
             vals = (
                 str(self.id),
                 datetime.fromtimestamp(self.creation_time).strftime(
-                    f"{DATE_FORMAT} {TIME_FORMAT}"
+                    self.config["time_format"]
                 ),
                 datetime.fromtimestamp(self.start_time).strftime(
-                    f"{DATE_FORMAT} {TIME_FORMAT}"
+                    self.config["time_format"]
                 ),
                 datetime.fromtimestamp(self.end_time).strftime(
-                    f"{DATE_FORMAT} {TIME_FORMAT}"
-                ) if not self.end_time is None else "None",
+                    self.config["time_format"]
+                )
+                if not self.end_time is None
+                else "None",
                 str(round(self.pause, 2)),
                 str(round(self.dedication(), 2)),
                 ",".join(self.tags),
@@ -96,11 +98,9 @@ class Task:
     def __str__(self) -> str:
         return 'Task[start_time: "{}", end_time: "{}", pause: {}, tags: "{}", notes: "{}"]'.format(
             datetime.fromtimestamp(self.start_time).strftime(
-                f"{DATE_FORMAT} {TIME_FORMAT}"
+                self.config["time_format"]
             ),
-            datetime.fromtimestamp(self.end_time).strftime(
-                f"{DATE_FORMAT} {TIME_FORMAT}"
-            )
+            datetime.fromtimestamp(self.end_time).strftime(self.config["time_format"])
             if not self.end_time is None
             else "None",
             self.pause,

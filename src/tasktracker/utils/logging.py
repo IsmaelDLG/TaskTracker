@@ -33,7 +33,7 @@ def getCustomLogger(
 
     default_config = load_config("LOGGING")
     level = config.get("level", default_config["level"])
-    file_path = config.get("file_path", default_config["file_path"])
+    file_path = config.get("file", default_config["file"])
     format = config.get("format", default_config["format"])
     time_format = config.get("time_format", default_config["time_format"])
     max_size = config.get("max_size", default_config["max_size"])
