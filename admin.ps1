@@ -27,7 +27,7 @@ FUNCTIONS
 Function Build {
     $BuildDir = "${PSScriptRoot}\output\dist\v$(${VERSION_HYPHENATED})"
     New-Item -ItemType Directory -Force -Path ${BuildDir} 
-    python3 -m build -o ${BuildDir}
+    python -m build -o ${BuildDir}
 }
 
 Function Install {
@@ -46,7 +46,25 @@ Function Install {
         }
     }
     "Installing ${Target}..."
-    python3 -m pip install $Target
+    python -m pip install $Target
+}
+
+function CleanBuild () {
+    if ($Target -eq "") {
+        # Install current version in config file
+        # "${DISTDIR}\v${VERSION_HYPHENATED}\${PROJECT}-${VERSION}${PACKAGE_ENDING}"
+        $Target = $VERSION
+    }
+    if ( -not (Test-Path -Path $Target -PathType Leaf)) {
+
+        if (-not(Test-Path -Path "${DISTDIR}\v$(${Target}.Replace(".","-"))\${PROJECT}-${Target}${PACKAGE_ENDING}")) {
+            Write-Host "Could not find version  ${DISTDIR}\v$(${Target}.Replace(".","-"))\${PROJECT}-${Target}${PACKAGE_ENDING}"
+        }
+        else {
+            $Target = "${DISTDIR}\v$(${Target}.Replace(".","-"))"
+        }
+    }
+    Remove-Item -Recurse -Force $Target
 }
 
 <#
@@ -57,6 +75,7 @@ Switch (${Action}) {
     "version" { "${PROJECT} v${VERSION}" }
 
     "build" {
+        CleanBuild ""
         Build
         break
     }
@@ -67,6 +86,14 @@ Switch (${Action}) {
     "update" {
         Build
         Install ${Target}
+        break
+    }
+    "uninstall" {
+        pip uninstall tasktracker
+        break
+    }
+    "clean" {
+        CleanBuild ${Target}
         break
     }
 

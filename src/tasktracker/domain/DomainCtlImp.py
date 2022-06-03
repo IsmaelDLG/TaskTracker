@@ -1,21 +1,19 @@
+from cmath import log
 import csv
 from pathlib import Path
 from time import time
 from typing import List, Tuple
 
+from tasktracker import getCustomLogger, CONFIG
 from tasktracker.domain.DomainCtlInt import DomainCtlInt
-from tasktracker.persistance.model.task import Task
-from tasktracker.persistance.ShelvePersistance import (
-    ShelvePersistance as persistanceCtl,
-)
-from tasktracker.utils.parsers import parse_timestamp, parse_tags
+from tasktracker.persistance.ShelvePersistance import ShelvePersistance
 
 
-class DomainCtlImpl(DomainCtlInt):
-    def __init__(self, config) -> None:
+class DomainCtlImp(DomainCtlInt):
+    def __init__(self) -> None:
         super().__init__()
-        self.config = config["DOMAIN"]
-        self.persistanceCtl = persistanceCtl(config["PERSISTANCE"])
+        self.config = {"csv": CONFIG["CSV"]}
+        self.persistanceCtl = ShelvePersistance()
 
     def create_task(
         self,
@@ -25,23 +23,24 @@ class DomainCtlImpl(DomainCtlInt):
         pause_time: float,
         tags: Tuple[str],
         notes: str,
-    ) -> Task:
-        # Validation
-        creation_time = parse_timestamp(creation_time)
-        start_time = parse_timestamp(start_time)
-        if end_time:
-            end_time = parse_timestamp(end_time)
-        # Its ok if end_time is None!
-        pause_time = float(pause_time)
-        tags = parse_tags(tags)
-        notes = str(notes)
-        # Proceed
+    ) -> object:
+        if creation_time is None or start_time is None:
+            # Its ok if end_time is None!
+            logger.error(f"creation_time: {creation_time} start_time: {start_time}")
+            raise RuntimeError("creation_time and start_time must be defined!")
+        if not (type(tags) in (list, tuple, str)):
+            logger.error(f"tags has wrong type: {type(tags)} tags: {tags}")
+            raise RuntimeError("creation_time and start_time must be defined!")
+
         return self.persistanceCtl.create_task(
             creation_time, start_time, end_time, pause_time, tags, notes
         )
 
-    def get_task(self, id: int):
-        self.persistanceCtl.get_task(id)
+    def get_task(self, id: int) -> object:
+        return self.persistanceCtl.get_task(id)
+
+    def get_last_task(self) -> object:
+        return self.persistanceCtl.get_task(self.persistanceCtl.get_task_last_id())
 
     def export_as_csv(
         self, file: Path, headers: bool = False, human_readable: bool = False
@@ -55,7 +54,7 @@ class DomainCtlImpl(DomainCtlInt):
                 task = None
                 try:
                     task = self.persistanceCtl.get_task(i)
-                    print("Got task: {}".format(task))
+                    logger.debug("Got task: {}".format(task))
                 except KeyError:
                     continue
                 if headers:
@@ -78,7 +77,7 @@ class DomainCtlImpl(DomainCtlInt):
                     ),
                 )
             for row in rows:
-                print(row)
+                logger.debug(row)
                 self.create_task(
                     row.get("creation_time", time()),
                     row.get("start_time", None),
@@ -87,3 +86,6 @@ class DomainCtlImpl(DomainCtlInt):
                     row.get("tags", ""),
                     row.get("notes", ""),
                 )
+
+
+logger = getCustomLogger("domain.DomainCtlImp")

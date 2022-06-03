@@ -3,30 +3,24 @@ from time import time
 from typing import Tuple, Type
 import click
 from datetime import datetime
-
-from tasktracker.domain.DomainCtlImp import DomainCtlImpl as DomainCtl
-from tasktracker.utils.parsers import parse_timestamp, parse_tags
-from tasktracker.utils.config import load_config
+from tasktracker.domain.DomainCtlImp import DomainCtlImp as DomainCtl
+from tasktracker import getCustomLogger, CONFIG
 
 
-config = load_config("CLI")
+def validate_time( ctx, param, value) -> float:
+    return param.timestamp()
 
-
-def validate_time(ctx, param, value) -> float:
+def validate_tags( ctx, param, value) -> Tuple[str]:
     try:
-        return parse_timestamp(value, config["input_time_formats"])
-    except ValueError:
-        raise click.BadParameter(
-            f"Got {value}. Format must be on of {', '.join(config['input_time_formats'])}."
-        )
-    except TypeError:
-        # Its ok to be None
-        return None
-
-
-def validate_tags(ctx, param, value) -> Tuple[str]:
-    try:
-        return parse_tags(value)
+        logger.debug(f"tags: {param}")
+        if not param:
+            raise TypeError("Cannot parse None to tags!")
+        if isinstance(param, tuple):
+            return param
+        elif isinstance(param, str):
+            return tuple(param.split(","))
+        else:
+            return ""
     except TypeError:
         # Its ok to be None
         return tuple()
@@ -39,7 +33,7 @@ def cli():
 
 
 @cli.group()
-def task():
+def tasks():
     """Task related operations"""
     pass
 
@@ -47,23 +41,21 @@ def task():
 @click.option(
     "-c",
     "--creation-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
-    default=time(),
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
+    default=datetime.utcnow(),
     help=f"Creation time as a timestamp or a string-like date. If not specified, creation_time is the current time",
 )
 @click.option(
     "-s",
     "--start-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
+    default=None,
     help=f"Start time as a timestamp or a string-like date. If not specified, start_time is the same as creation time",
 )
 @click.option(
     "-e",
     "--end-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
     help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
@@ -76,7 +68,7 @@ def task():
 @click.option(
     "-t",
     "--tags",
-    type=click.UNPROCESSED,
+    type=str,
     callback=validate_tags,
     help="Comma-separated list of tags to include in the task. If not specified, this field is left empty.",
 )
@@ -87,10 +79,8 @@ def task():
     default="",
     help="Notes for the task. If not specified, this field is left empty.",
 )
-@task.command()
-@click.pass_context
+@tasks.command()
 def create(
-    ctx,
     creation_time: float,
     start_time: float,
     end_time: float,
@@ -100,14 +90,15 @@ def create(
 ):
     """Create a Task"""
 
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+    domainCtl = DomainCtl()
 
+    if not creation_time:
+        creation_time = datetime.utcnow().timestamp()
     if not start_time:
         start_time = creation_time
 
-    task = ctx.domainCtl.create_task(
-        creation_time, start_time, end_time, pause, tags, notes
+    task = domainCtl.create_task(
+        creation_time.timestamp(), start_time.timestamp(), end_time.timestamp(), pause, tags, notes
     )
     click.echo(task)
 
@@ -115,22 +106,20 @@ def create(
 @click.option(
     "-c",
     "--creation-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
-    default=time(),
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
+    default=datetime.utcnow(),
     help=f"Creation time as a timestamp or a string-like date. If not specified, creation_time is the current time",
 )
 @click.option(
     "-s",
     "--start-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
     help=f"Start time as a timestamp or a string-like date. If not specified, start_time is the same as creation time",
 )
 @click.option(
     "-t",
     "--tags",
-    type=click.UNPROCESSED,
+    type=str,
     callback=validate_tags,
     help="Comma-separated list of tags to include in the task. If not specified, this field is left empty.",
 )
@@ -141,10 +130,8 @@ def create(
     default="",
     help="Notes for the task. If not specified, this field is left empty.",
 )
-@task.command()
-@click.pass_context
+@tasks.command()
 def start(
-    ctx,
     creation_time: float,
     start_time: float,
     tags: str,
@@ -154,14 +141,13 @@ def start(
     end_time = None
     pause = 0
 
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+    domainCtl = DomainCtl()
 
     if not start_time:
         start_time = creation_time
 
-    task = ctx.domainCtl.create_task(
-        creation_time, start_time, end_time, pause, tags, notes
+    task = domainCtl.create_task(
+        creation_time.timestamp(), start_time.timestamp(), end_time.timestamp(), pause, tags, notes
     )
     click.echo(task)
 
@@ -170,8 +156,7 @@ def start(
 @click.option(
     "-e",
     "--end-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
     help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
@@ -184,7 +169,7 @@ def start(
 @click.option(
     "-t",
     "--tags",
-    type=click.UNPROCESSED,
+    type=str,
     callback=validate_tags,
     help="Comma-separated list of tags to include in the task. If not specified, this field is left empty.",
 )
@@ -195,10 +180,10 @@ def start(
     default="",
     help="Notes for the task. If not specified, this field is left empty.",
 )
-@task.command()
-@click.pass_context
+@tasks.command()
+
 def end(
-    ctx,
+    
     id: int,
     end_time: float,
     pause: float,
@@ -207,18 +192,16 @@ def end(
 ):
     """End a Task in progress"""
 
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+    domainCtl = DomainCtl()
     click.echo("TODO")
-    # ctx.domainCtl.update_task(id, end_time, pause, tags, notes)
+    # domainCtl.update_task(id, end_time.timestamp(), pause, tags, notes)
 
 
 @click.option("-k", "--id", type=click.INT, help="ID of the task to end.")
 @click.option(
     "-e",
     "--end-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
     help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
@@ -231,7 +214,7 @@ def end(
 @click.option(
     "-t",
     "--tags",
-    type=click.UNPROCESSED,
+    type=str,
     callback=validate_tags,
     help="Comma-separated list of tags to include in the task. If not specified, this field is left empty.",
 )
@@ -242,10 +225,10 @@ def end(
     default="",
     help="Notes for the task. If not specified, this field is left empty.",
 )
-@task.command()
-@click.pass_context
+@tasks.command()
+
 def end_last(
-    ctx,
+    
     end_time: float,
     pause: float,
     tags: str,
@@ -253,32 +236,45 @@ def end_last(
 ):
     """End a last Task in progress"""
 
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+    domainCtl = DomainCtl()
     click.echo("TODO")
-    # ctx.domainCTl.update_task(LAST??, end_time, pause, tags, notes)
+    # ctx.domainCTl.update_task(LAST??, end_time.timestamp(), pause, tags, notes)
+
+@click.option(
+    "-k",
+    "--id",
+    type=click.INT,
+    default=None,
+    help="ID of the task. If not specified, this method will return the last task created.",
+)
+@tasks.command()
+def get(id:int):
+    """ Get a task """
+    domainCtl = DomainCtl()
+    if id:
+        task = domainCtl.get_task(id)
+    else:
+        task = domainCtl.get_last_task()
+    click.echo(task)
 
 
 @click.option(
     "-c",
     "--creation-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
-    default=time(),
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
+    default=datetime.utcnow(),
     help=f"Creation time as a timestamp or a string-like date. If not specified, creation_time is the current time",
 )
 @click.option(
     "-s",
     "--start-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
     help=f"Start time as a timestamp or a string-like date. If not specified, start_time is the same as creation time",
 )
 @click.option(
     "-e",
     "--end-time",
-    type=click.UNPROCESSED,
-    callback=validate_time,
+    type=click.DateTime(formats=[CONFIG["DATES"]["datetime_format"]]),
     help=f"End time as a timestamp or a string-like date. If not specified, this field is left empty",
 )
 @click.option(
@@ -291,7 +287,7 @@ def end_last(
 @click.option(
     "-t",
     "--tags",
-    type=click.UNPROCESSED,
+    type=str,
     callback=validate_tags,
     help="Comma-separated list of tags to include in the task. If not specified, this field is left empty.",
 )
@@ -302,10 +298,10 @@ def end_last(
     default="",
     help="Notes for the task. If not specified, this field is left empty.",
 )
-@task.command()
-@click.pass_context
+@tasks.command()
+
 def update(
-    ctx,
+    
     creation_time: float,
     start_time: float,
     end_time: float,
@@ -315,13 +311,12 @@ def update(
 ):
     """Create a Task"""
 
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+    domainCtl = DomainCtl()
     click.echo("TODO")
-    # ctx.domainCtl.update_task(creation_time, start_time, end_time, pause, tags, notes)
+    # domainCtl.update_task(creation_time.timestamp(), start_time.timestamp(), end_time.timestamp(), pause, tags, notes)
 
 
-@task.command()
+@tasks.command()
 @click.argument("path", type=click.Path(exists=True), default=str(Path(".").absolute()))
 @click.argument("name", type=str, default=f"tasks-{int(round(time()))}.csv")
 @click.option(
@@ -336,18 +331,18 @@ def update(
     default=False,
     help="Set this option to tell tt_cli the CSV file needs to be human readable (affects dates and numbers).",
 )
-@click.pass_context
-def export(ctx, path, name, headers, human_readable):
+
+def export( path, name, headers, human_readable):
     """Export all tasks as a CSV file."""
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+
+    domainCtl = DomainCtl()
 
     pathp = Path(path)
     namep = Path(name)
-    ctx.domainCtl.export_as_csv(pathp / namep, headers, human_readable)
+    domainCtl.export_as_csv(pathp / namep, headers, human_readable)
 
 
-@task.command("import")
+@tasks.command("import")
 @click.argument("file", type=click.Path(exists=True))
 @click.option(
     "--headers",
@@ -355,15 +350,16 @@ def export(ctx, path, name, headers, human_readable):
     default=False,
     help="Set this option to tell tt_cli the CSV file has headers.",
 )
-@click.pass_context
-def imp(ctx, file, headers):
+
+def imp( file, headers):
     """Import all tasks from a CSV file."""
-    config = load_config()
-    ctx.domainCtl = DomainCtl(config)
+    domainCtl = DomainCtl()
 
     filep = Path(file)
-    ctx.domainCtl.import_from_csv(filep, headers)
+    domainCtl.import_from_csv(filep, headers)
 
+
+logger = getCustomLogger("presentation.tt_cli")
 
 if __name__ == "__main__":
     cli()
