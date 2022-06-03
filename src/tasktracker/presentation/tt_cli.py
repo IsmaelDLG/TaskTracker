@@ -7,10 +7,11 @@ from tasktracker.domain.DomainCtlImp import DomainCtlImp as DomainCtl
 from tasktracker import getCustomLogger, CONFIG
 
 
-def validate_time( ctx, param, value) -> float:
+def validate_time(ctx, param, value) -> float:
     return param.timestamp()
 
-def validate_tags( ctx, param, value) -> Tuple[str]:
+
+def validate_tags(ctx, param, value) -> Tuple[str]:
     try:
         logger.debug(f"tags: {param}")
         if not param:
@@ -98,7 +99,12 @@ def create(
         start_time = creation_time
 
     task = domainCtl.create_task(
-        creation_time.timestamp(), start_time.timestamp(), end_time.timestamp(), pause, tags, notes
+        creation_time.timestamp(),
+        start_time.timestamp(),
+        end_time.timestamp(),
+        pause,
+        tags,
+        notes,
     )
     click.echo(task)
 
@@ -147,7 +153,12 @@ def start(
         start_time = creation_time
 
     task = domainCtl.create_task(
-        creation_time.timestamp(), start_time.timestamp(), end_time.timestamp(), pause, tags, notes
+        creation_time.timestamp(),
+        start_time.timestamp(),
+        end_time.timestamp(),
+        pause,
+        tags,
+        notes,
     )
     click.echo(task)
 
@@ -181,9 +192,7 @@ def start(
     help="Notes for the task. If not specified, this field is left empty.",
 )
 @tasks.command()
-
 def end(
-    
     id: int,
     end_time: float,
     pause: float,
@@ -226,9 +235,7 @@ def end(
     help="Notes for the task. If not specified, this field is left empty.",
 )
 @tasks.command()
-
 def end_last(
-    
     end_time: float,
     pause: float,
     tags: str,
@@ -240,6 +247,7 @@ def end_last(
     click.echo("TODO")
     # ctx.domainCTl.update_task(LAST??, end_time.timestamp(), pause, tags, notes)
 
+
 @click.option(
     "-k",
     "--id",
@@ -248,8 +256,8 @@ def end_last(
     help="ID of the task. If not specified, this method will return the last task created.",
 )
 @tasks.command()
-def get(id:int):
-    """ Get a task """
+def get(id: int):
+    """Get a task"""
     domainCtl = DomainCtl()
     if id:
         task = domainCtl.get_task(id)
@@ -299,9 +307,7 @@ def get(id:int):
     help="Notes for the task. If not specified, this field is left empty.",
 )
 @tasks.command()
-
 def update(
-    
     creation_time: float,
     start_time: float,
     end_time: float,
@@ -331,8 +337,7 @@ def update(
     default=False,
     help="Set this option to tell tt_cli the CSV file needs to be human readable (affects dates and numbers).",
 )
-
-def export( path, name, headers, human_readable):
+def export(path, name, headers, human_readable):
     """Export all tasks as a CSV file."""
 
     domainCtl = DomainCtl()
@@ -350,8 +355,7 @@ def export( path, name, headers, human_readable):
     default=False,
     help="Set this option to tell tt_cli the CSV file has headers.",
 )
-
-def imp( file, headers):
+def imp(file, headers):
     """Import all tasks from a CSV file."""
     domainCtl = DomainCtl()
 

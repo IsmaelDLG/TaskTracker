@@ -32,7 +32,9 @@ class ShelvePersistance(PersistanceCtlInt):
         notes: str,
     ) -> Task:
         last_id = self.get_task_last_id()
-        logger.debug(f"creation_time: {creation_time} start_time: {start_time} end_time: {end_time} pause_time: {pause_time} tags: {tags} notes: {notes}")
+        logger.debug(
+            f"creation_time: {creation_time} start_time: {start_time} end_time: {end_time} pause_time: {pause_time} tags: {tags} notes: {notes}"
+        )
         newtask = Task(
             last_id + 1, creation_time, start_time, end_time, pause_time, tags, notes
         )
@@ -59,5 +61,6 @@ class ShelvePersistance(PersistanceCtlInt):
     def save_changes(self, tasks=True) -> None:
         if tasks:
             self.taskDB.sync()
+
 
 logger = getCustomLogger("persistance.ShelvePersistance")

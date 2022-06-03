@@ -13,9 +13,9 @@ CONFIG = {
         "profiles_file": Path(__file__).parent.resolve() / Path("profiles_db"),
     },
     "DATES": {
-        "timestamp_format": "%f", 
+        "timestamp_format": "%f",
         "datetime_format": "%Y-%m-%dT%H:%M:%SZ",
-        },
+    },
     "LOGGING": {
         "level": "DEBUG",
         "file": "tasktracker.log",
