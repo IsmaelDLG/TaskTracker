@@ -22,28 +22,6 @@ class ShelvePersistance(PersistanceCtlInt):
         else:
             raise IsADirectoryError("Tasks database file is a directory!")
 
-    def create_task(
-        self,
-        creation_time: float,
-        start_time: float,
-        end_time: float,
-        pause_time: float,
-        tags: Tuple[str],
-        notes: str,
-    ) -> Task:
-        last_id = self.get_task_last_id()
-        logger.debug(
-            f"creation_time: {creation_time} start_time: {start_time} end_time: {end_time} pause_time: {pause_time} tags: {tags} notes: {notes}"
-        )
-        newtask = Task(
-            last_id + 1, creation_time, start_time, end_time, pause_time, tags, notes
-        )
-
-        self._update_metadata("last_id", last_id + 1)
-        self.taskDB[str(newtask.id)] = newtask
-
-        return newtask
-
     def _update_metadata(self, key, value):
         meta = self.taskDB["_metadata"]
         meta[key] = value
@@ -58,9 +36,17 @@ class ShelvePersistance(PersistanceCtlInt):
     def get_task(self, id: int) -> Task:
         return self.taskDB[str(id)]
 
-    def save_changes(self, tasks=True) -> None:
-        if tasks:
-            self.taskDB.sync()
+    def save_task(self, task: Task) -> Task:
+        if not task.id:
+            task.id = self.get_task_last_id()
+            self._update_metadata("last_id", task.id + 1)
+
+        self.taskDB[str(task.id)] = task
+
+    def delete_task(self, id):
+        task = self.taskDB[str(id)]
+        logger.debug(":delete_task task: {task}")
+        del self.taskDB[str(id)]
 
 
 logger = getCustomLogger("persistance.ShelvePersistance")

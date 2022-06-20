@@ -45,7 +45,6 @@ Function Install {
             $Target = "${DISTDIR}\v$(${Target}.Replace(".","-"))\${PROJECT}-${Target}${PACKAGE_ENDING}"
         }
     }
-    "Installing ${Target}..."
     python -m pip install $Target
 }
 

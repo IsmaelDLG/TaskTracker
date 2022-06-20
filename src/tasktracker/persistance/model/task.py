@@ -37,7 +37,7 @@ class Task:
         return (
             (self.end_time - self.start_time - self.pause) / (60 * 60)
             if not self.end_time is None
-            else -1.0
+            else 0
         )
 
     def keys(self) -> Tuple[str]:
@@ -64,6 +64,7 @@ class Task:
 
     def values_str(self, human_readable=False) -> Tuple[str]:
         vals = None
+        dedic = self.dedication()
         if human_readable:
             vals = (
                 str(self.id),
@@ -77,9 +78,9 @@ class Task:
                     CONFIG["DATES"]["datetime_format"]
                 )
                 if not self.end_time is None
-                else "None",
+                else "",
                 str(round(self.pause, 2)),
-                str(round(self.dedication(), 2)),
+                str(round(dedic, 2)) if dedic != 0 else "",
                 ",".join(self.tags),
             )
         else:
@@ -95,7 +96,8 @@ class Task:
         return vals
 
     def __str__(self) -> str:
-        return 'Task[start_time: "{}", end_time: "{}", pause: {}, tags: "{}", notes: "{}"]'.format(
+        return 'Task<id: {} start_time: "{}", end_time: "{}", pause: {}, tags: "{}", notes: "{}">'.format(
+            self.id,
             datetime.fromtimestamp(self.start_time).strftime(
                 CONFIG["DATES"]["datetime_format"]
             ),
@@ -103,7 +105,7 @@ class Task:
                 CONFIG["DATES"]["datetime_format"]
             )
             if not self.end_time is None
-            else "None",
+            else "",
             self.pause,
             ", ".join(self.tags),
             self.notes[:25],
