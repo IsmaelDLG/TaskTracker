@@ -9,8 +9,9 @@ CONFIG = {
         "separator": ";",
     },
     "SHELVE": {
-        "tasks_file": Path(__file__).parent.resolve() / Path("tasks_db"),
-        "profiles_file": Path(__file__).parent.resolve() / Path("profiles_db"),
+        "tasks_file": Path(
+            "C:\\Users\\ismae\\Downloads\\tasks_db"
+        )  # Path(__file__).parent.resolve() / Path("tasks_db"),
     },
     "DATES": {
         "timestamp_format": "%f",

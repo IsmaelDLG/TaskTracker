@@ -15,7 +15,6 @@ class ShelvePersistance(PersistanceCtlInt):
         super().__init__()
         self.tasks_file = Path(CONFIG["SHELVE"]["tasks_file"])
         if not self.tasks_file.is_dir():
-
             self.taskDB = shelve.open(str(self.tasks_file))
             if not self.taskDB.get("_metadata"):
                 self.taskDB["_metadata"] = {"last_id": 0}
@@ -34,19 +33,40 @@ class ShelvePersistance(PersistanceCtlInt):
         return meta["last_id"]
 
     def get_task(self, id: int) -> Task:
-        return self.taskDB[str(id)]
+        """Return task with the provided id, if it exists
+
+        Args:
+            id (int): id of the task to retrieve
+
+        Raises:
+            KeyError: Raised when task is not found
+
+        Returns:
+            Task: _description_
+        """
+        try:
+            return self.taskDB[str(id)]
+        except KeyError:
+            raise KeyError(f"Task {id} does not exist!")
 
     def save_task(self, task: Task) -> Task:
         if not task.id:
-            task.id = self.get_task_last_id()
-            self._update_metadata("last_id", task.id + 1)
+            task.id = self.get_task_last_id() + 1
+            self._update_metadata("last_id", task.id)
 
         self.taskDB[str(task.id)] = task
+        logger.info(f":save_task new task id: {task.id}")
+        return task
 
-    def delete_task(self, id):
-        task = self.taskDB[str(id)]
-        logger.debug(":delete_task task: {task}")
+    def delete_task(self, id) -> Task:
+        task = None
+        try:
+            task = self.taskDB[str(id)]
+            logger.debug(":delete_task task: {task}")
+        except KeyError:
+            raise KeyError(f"Task {id} does not exist!")
         del self.taskDB[str(id)]
+        return task
 
 
 logger = getCustomLogger("persistance.ShelvePersistance")

@@ -43,21 +43,21 @@ class DomainCtlImp(DomainCtlInt):
         return self.persistanceCtl.save_task(newtask)
 
     def get_task(self, id: int) -> object:
-        """_summary_
+        """Returns the task with the given id, if it exists
 
         Args:
             id (int): ID of the task to return
 
         Raises:
-            e: _description_
+            KeyError: Task with provided id couldn't be found
 
         Returns:
-            object: _description_
+            object: Task with given id.
         """
         try:
             return self.persistanceCtl.get_task(id)
-        except IndexError as e:
-            logger.error(f"Could not get task with id: {id}! error: {e}")
+        except KeyError as e:
+            logger.error(f":get_last_task could not get task with id: {id}! error: {e}")
             raise e
 
     def get_last_task(self) -> object:
@@ -71,8 +71,8 @@ class DomainCtlImp(DomainCtlInt):
         """
         try:
             return self.persistanceCtl.get_task(self.persistanceCtl.get_task_last_id())
-        except IndexError as e:
-            logger.error(f"Could not get last task! error: {e}")
+        except KeyError as e:
+            logger.error(f":get_last_task could not get last task! error: {e}")
             raise e
 
     def edit_task(self, start_time, end_time, pause, tags, notes) -> object:
@@ -93,8 +93,23 @@ class DomainCtlImp(DomainCtlInt):
         if notes:
             task.notes = notes
 
-    def delete_task(self, id: int):
-        self.persistanceCtl.delete_task(id)
+    def delete_task(self, id: int) -> Task:
+        """Deletes a task from persistance
+
+        Args:
+            id (int): ID of the task to delete
+
+        Raises:
+            KeyError: No task with given id was found
+
+        Returns:
+            Task: The task deleted
+        """
+        try:
+            return self.persistanceCtl.delete_task(id)
+        except KeyError as e:
+            logger.info(f":delete_task id: {id} does not exist")
+            raise e
 
     def export_as_csv(
         self, file: Path, headers: bool = False, human_readable: bool = False

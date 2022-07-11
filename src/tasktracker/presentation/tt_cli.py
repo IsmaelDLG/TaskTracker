@@ -150,7 +150,7 @@ def edit(
 
     try:
         task = domainCtl.edit_task(id, start_time, end_time, pause, tags, notes)
-    except IndexError as e:
+    except KeyError as e:
         click.echo(str(e))
         return 1
 
@@ -169,13 +169,13 @@ def get(id: int):
     if id:
         try:
             task = domainCtl.get_task(id)
-        except IndexError as e:
+        except KeyError as e:
             click.echo(str(e))
             return 1
     else:
         try:
             task = domainCtl.get_last_task()
-        except IndexError as e:
+        except KeyError as e:
             click.echo(str(e))
             return 1
     click.echo(task)
@@ -188,11 +188,11 @@ def delete(id: int):
     domainCtl = DomainCtl()
     try:
         task = domainCtl.delete_task(id)
-    except IndexError as e:
-        click.echo(str(e))
+    except KeyError as e:
+        click.echo(f"Task {id} does not exist")
         return 1
 
-    click.echo(task)
+    click.echo(f"Deleted task: {task}")
 
 
 @tasks.command()
@@ -200,18 +200,21 @@ def get_all():
     """Get all tasks in the database"""
 
     domainCtl = DomainCtl()
+    current = None
     try:
         current = domainCtl.get_last_task()
-    except IndexError as e:
-        click.echo("Unknown Error!")
+        click.echo(current)
+    except KeyError as e:
+        click.echo("No tasks were found!")
+        return
+
     i = current.id - 1
-    click.echo(current)
     while i > 0:
         try:
             current = domainCtl.get_task(i)
-        except IndexError as e:
-            click.echo("Unknown Error!")
-        click.echo(current)
+            click.echo(current)
+        except KeyError as e:
+            pass
         i -= 1
 
 
@@ -254,7 +257,3 @@ def imp(file, headers):
 
     filep = Path(file)
     domainCtl.import_from_csv(filep, headers)
-
-
-if __name__ == "__main__":
-    cli()

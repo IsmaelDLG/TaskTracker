@@ -20,12 +20,10 @@ class DomainCtlInt(abc.ABC):
     def get_task(self, id: int):
         pass
 
-    """
     @abc.abstractclassmethod
-    def update_task(self):
+    def edit_task(self, start_time, end_time, pause, tags, notes):
         pass
 
     @abc.abstractclassmethod
-    def delete_task(self):
+    def delete_task(self, id: int):
         pass
-    """
